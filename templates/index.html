@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مترجم هوشمند کتاب PDF</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <div class="logo">
+                <span class="material-symbols-rounded">translate</span>
+            </div>
+            <div class="header-text">
+                <h1>مترجم هوشمند کتاب PDF</h1>
+                <p>انگلیسی به فارسی با هوش مصنوعی Gemini</p>
+            </div>
+        </header>
+
+        <main>
+            <section id="help-section" class="card">
+                <div class="help-header">
+                    <h2><i class="fas fa-question-circle"></i> راهنمای استفاده</h2>
+                    <button id="toggle-help" class="btn icon-btn"><i class="fas fa-chevron-down"></i></button>
+                </div>
+                <div id="help-content" class="help-content hidden">
+                    <div class="help-step">
+                        <div class="step-number">۱</div>
+                        <div class="step-content">
+                            <h3>انتخاب فایل PDF</h3>
+                            <p>فایل PDF انگلیسی خود را با کشیدن و رها کردن یا از طریق دکمه انتخاب فایل بارگذاری کنید.</p>
+                        </div>
+                    </div>
+                    <div class="help-step">
+                        <div class="step-number">۲</div>
+                        <div class="step-content">
+                            <h3>تنظیم پارامترها</h3>
+                            <p>تعداد صفحات در هر درخواست را تنظیم کنید. تعداد کمتر دقت بیشتری دارد اما زمان بیشتری می‌برد.</p>
+                        </div>
+                    </div>
+                    <div class="help-step">
+                        <div class="step-number">۳</div>
+                        <div class="step-content">
+                            <h3>شروع ترجمه</h3>
+                            <p>دکمه شروع ترجمه را بزنید و منتظر بمانید تا فرآیند ترجمه تکمیل شود.</p>
+                        </div>
+                    </div>
+                    <div class="help-step">
+                        <div class="step-number">۴</div>
+                        <div class="step-content">
+                            <h3>دریافت نتیجه</h3>
+                            <p>پس از تکمیل ترجمه، می‌توانید فایل PDF ترجمه شده یا متن ترجمه را دانلود کنید.</p>
+                        </div>
+                    </div>
+                    <div class="help-note">
+                        <p><i class="fas fa-info-circle"></i> <strong>نکته:</strong> به دلیل محدودیت API، ممکن است برای فایل‌های بزرگ نیاز به صبر بیشتری باشد.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="upload-section" class="card">
+                <h2><i class="fas fa-cloud-upload-alt"></i> آپلود فایل PDF</h2>
+                <div class="upload-container" id="drop-area">
+                    <div class="upload-icon">
+                        <i class="fas fa-file-pdf fa-3x"></i>
+                    </div>
+                    <p>فایل PDF خود را اینجا رها کنید یا</p>
+                    <label for="file-input" class="btn primary-btn">انتخاب فایل</label>
+                    <input type="file" id="file-input" accept=".pdf" hidden>
+                    <p id="file-name"></p>
+                </div>
+                
+                <div class="settings-container">
+                    <h3><i class="fas fa-cog"></i> تنظیمات ترجمه</h3>
+                    <div class="setting-item">
+                        <label for="api-key">کلید API Gemini:</label>
+                        <div class="input-container">
+                            <input type="text" id="api-key" class="text-input" placeholder="کلید API خود را وارد کنید">
+                        </div>
+                        <div class="setting-description">
+                            <p><i class="fas fa-info-circle"></i> کلید API خود را از <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a> دریافت کنید.</p>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="pages-per-chunk">تعداد صفحات در هر درخواست:</label>
+                        <div class="range-container">
+                            <input type="range" id="pages-per-chunk" min="1" max="10" value="5" class="range-slider">
+                            <span id="pages-per-chunk-value">5</span>
+                        </div>
+                        <div class="setting-description">
+                            <p>تعداد کمتر = دقت بیشتر، سرعت کمتر | تعداد بیشتر = سرعت بیشتر، احتمال خطای بیشتر</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="upload-btn" class="btn primary-btn" disabled><i class="fas fa-play"></i> شروع ترجمه</button>
+            </section>
+
+            <section id="progress-section" class="card hidden">
+                <h2><i class="fas fa-spinner fa-spin"></i> در حال ترجمه...</h2>
+                <div class="progress-container">
+                    <div class="progress-info">
+                        <span id="progress-percent">0%</span>
+                        <span id="progress-time">زمان باقیمانده: در حال محاسبه...</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                </div>
+                <div class="chunk-container" id="chunk-container">
+                    <!-- Chunks will be added here dynamically -->
+                </div>
+            </section>
+
+            <section id="result-section" class="card hidden">
+                <h2><i class="fas fa-check-circle"></i> ترجمه تکمیل شد</h2>
+                <div class="result-actions">
+                    <button id="download-pdf-btn" class="btn primary-btn"><i class="fas fa-file-pdf"></i> دانلود PDF</button>
+                    <button id="download-text-btn" class="btn secondary-btn"><i class="fas fa-file-alt"></i> دانلود متن</button>
+                    <button id="new-translation-btn" class="btn outline-btn"><i class="fas fa-redo"></i> ترجمه جدید</button>
+                </div>
+                <div class="translation-preview" id="translation-preview">
+                    <!-- Translation preview will be shown here -->
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p><i class="fas fa-heart"></i> ساخته شده با عشق توسط مهدی عابدی</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
