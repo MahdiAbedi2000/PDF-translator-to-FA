@@ -41,6 +41,7 @@ pip install -r requirements.txt
    ```
    GEMINI_API_KEY=your_gemini_api_key_here
    ```
+   برای گرفتن api رایگان جمنای به سایت https://aistudio.google.com/apikey وارد شوید و کلید رایگان بگیرید.
 
 5. اجرای برنامه:
 ```bash
